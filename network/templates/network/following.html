@@ -1,0 +1,75 @@
+{% extends "network/layout.html" %}
+{% block body %}
+<div class="following_logo">
+    <h2>USERS THAT YOU FOLLOW</h2>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="40" viewBox="0 0 24 24" fill="none" stroke="#7ed321"
+        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+        <circle cx="9" cy="7" r="4"></circle>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+    </svg>
+</div>
+<br>
+{% for alert in messages %}
+<div class="alert">
+    <div class="alert alert-warning" role="alert">
+        {{alert}}
+    </div>
+</div>
+<br>
+{%endfor%}
+<div class="NewFeed">
+    <br>
+    {% for Post in post_page %}
+    <div class="card">
+        <div class="card-header">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="feather feather-users">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+            <a class="user_hyperlink" href="{%url 'profile' user_id=Post.user.id %}">{{Post.user}}</a>
+        </div>
+        <div class="card-body">
+            <blockquote class="blockquote mb-0">
+                <p>{{Post.content}}</p>
+                <div class="likest">
+                    {%if user.id != Post.user.id%}
+                    {% if Post.id in postLikes%}
+                    <div class="likes_people">{{postLikes|length}}-Likes </div>
+                    <button class="btn_like" onclick="submit({{Post.id}},'like')" id="{{Post.id}}">
+                        <i class="like_btn fa-solid fa-heart"></i>
+                    </button>
+                    {%else%}
+                    <button class="btn_like" onclick="submit({{Post.id}},'unlike') "id="{{Post.id}}">
+                        <i class="unlike_btn fa-solid fa-heart"></i>
+                    </button>
+                    {% endif %}
+                    {% endif %}
+                </div>
+                <footer class="blockquote-footer">{{Post.date}}<strong> AT : </strong>{{Post.time}}</footer>
+            </blockquote>
+        </div>
+    </div>
+    <br>
+    {%endfor%}
+    <div class="navigation">
+        <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-center">
+                {% if post_page.has_previous%}
+                <a class="page-link" href="?page={{post_page.previous_page_number}}">Previous</a>
+                </li>
+                {%endif%}
+                {%if post_page.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{post_page.next_page_number}}">Next</a>
+                </li>
+            </ul>
+        </nav>
+        {%endif%}
+    </div>
+    {%endblock%}

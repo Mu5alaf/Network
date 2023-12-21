@@ -1,0 +1,132 @@
+{% extends "network/layout.html" %}
+{% load static %}
+{% block body %}
+{% comment %} ----------------- {% endcomment %}
+{%if user.is_authenticated %}
+{% for alert in messages %}
+<div class="alert_2">
+    <div class="alert alert-primary" role="alert">
+        {{alert}}
+    </div>
+    {% endfor %}
+    <br>
+    <div class="page_feed">
+        <h1 class="index_title">Home-Feed</h1>
+        <svg class="svg_logo" viewBox="0 0 44 44" version="1.1" xmlns="http://www.w3.org/2000/svg"
+            xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000">
+            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+            <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+            <g id="SVGRepo_iconCarrier">
+                <title>RSS-color</title>
+                <desc>Created with Sketch.</desc>
+                <defs> </defs>
+                <g id="Icons" stroke="#000" stroke-width="2" fill="none" fill-rule="evenodd">
+                    <g id="Color-" transform="translate(-800.000000, -760.000000)" fill="#37b24d">
+                        <path
+                            d="M800.000471,797.714286 C800.000471,794.243 802.81487,791.428571 806.286118,791.428571 C809.757367,791.428571 812.571765,794.243 812.571765,797.714286 C812.571765,801.185571 809.757367,804 806.286118,804 C802.81487,804 800.000471,801.185571 800.000471,797.714286 Z M844,804 L835.619661,804 C835.619661,784.358714 819.641547,768.380429 800.000471,768.380429 L800.000471,760 C824.261497,760 844,779.738714 844,804 Z M829.333543,804 L820.953204,804 C820.953204,792.446857 811.553019,783.048143 800,783.048143 L800,774.666143 C816.174541,774.666143 829.333543,787.825286 829.333543,804 Z"
+                            id="RSS"> </path>
+                    </g>
+                </g>
+            </g>
+        </svg>
+    </div>
+    <div class="NewPost">
+        <div class="edit_logo">
+            <h2>Write a Post</h2>
+            <svg xmlns="http://www.w3.org/2000/svg" width="30" height="40" viewBox="0 0 24 24" fill="none"
+                stroke="#37b24d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="14 2 18 6 7 17 3 17 3 13 14 2"></polygon>
+                <line x1="3" y1="22" x2="21" y2="22"></line>
+            </svg>
+        </div>
+        <form method='POST'>
+            {% csrf_token %}
+            {{form}}
+            <div class='btn'>
+                <input type='submit' value='Post' class="btn btn-primary">
+            </div>
+        </form>
+        <br>
+    </div>
+    {%endif%}
+    <div class="NewFeed">
+        {% for Post in post_page %}
+        <br>
+        <div class="card">
+            <div class="card-header">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="feather feather-users">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+                <a class="user_hyperlink" href="{%url 'profile' user_id=Post.user.id %}">{{Post.user}}</a>
+            </div>
+            <div class="card-body">
+                <blockquote class="blockquote mb-0">
+                    <p class="post_content_p_{{Post.id}}" data-post_id="{{Post.id}}">{{Post.content}}</p>
+                    <form method='POST' action="{% url 'EditPost' Post.id %}">
+                        {% csrf_token %}
+                        <textarea name="content" class="form-control post_content_text post_content_text_{{Post.id}}"
+                            rows="3"></textarea>
+                        <div class='btn'>
+                            <input type='submit' value='Update'
+                                class="btn btn-outline-info update_btn update_btn_{{Post.id}}">
+                            <button type="button" class="btn btn-outline-warning ml-2 cancel_btn cancel_btn_{{Post.id}}"
+                                data-post_id="{{Post.id}}">Cancel</button>
+                        </div>
+                    </form>
+                    <div class="likest">
+                        {%if user.id != Post.user.id%}
+                        {%if user.is_authenticated%}
+                        {% if Post.id in postLikes%}
+                        <div class="likes_people">{{postLikes|length}}-Likes </div>
+                        <button class="btn_like" onclick="submit({{Post.id}},'like')" id="{{Post.id}}">
+                            <i class="like_btn fa-solid fa-heart"></i>
+                        </button>
+                        {%else%}
+                        <button class="btn_like" onclick="submit({{Post.id}},'unlike') "id="{{Post.id}}">
+                            <i class="unlike_btn fa-solid fa-heart"></i>
+                        </button>
+                        {% endif %}
+                        {% endif %}
+                        {% endif %}
+                    </div>
+                    <p class="card-text"><small class="text-muted">{{Post.date}}<strong> AT : </strong>{{Post.time}}</small></p>
+                </blockquote>
+            </div>
+        </div>
+        {%if user.is_authenticated%}
+        {%if user.id == Post.user.id%}
+        <div class="Post_button">
+            <button type="button" class="btn btn-primary editBtn edit_btn_{{Post.id}}" data-toggle="collapse"
+                data-target="#collapseExampl_{{Post.id}}" data-post_id="{{Post.id}}">Edit
+            </button>
+            <button type="submit" class="btn btn-danger" onclick="return confirm ('Are You sure?')">
+                <a href="{% url 'DeletePost' Post.id%}">Delete</a>
+            </button>
+        </div>
+        <br>
+        {%endif%}
+        {%endif%}
+        {%endfor%}
+    </div>
+    <br>
+    <div class="navigation">
+        <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-center">
+                {% if post_page.has_previous%}
+                <a class="page-link" href="?page={{post_page.previous_page_number}}">Previous</a>
+                </li>
+                {%endif%}
+                {%if post_page.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{post_page.next_page_number}}">Next</a>
+                </li>
+            </ul>
+        </nav>
+        {%endif%}
+    </div>
+    {% endblock %}
